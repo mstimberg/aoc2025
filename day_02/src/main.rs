@@ -1,25 +1,42 @@
 use itertools::Itertools;
-use std::fs;
+use std::{collections::HashSet, fs};
 
 fn invalid_sum_for_range(start: &str, end: &str) -> u64 {
+    println!("{}-{}", start, end);
     let start_value = start.parse::<u64>().unwrap();
     let end_value = end.parse::<u64>().unwrap();
     let mut sum = 0;
-    // Maybe slightly more intelligent than going through the full range:
+    // Maybe slightly more intelligent than going through the full range and verifying all values:
     // Create all possible invalid ids of the appropriate length and check whether they
     // are in the range
-    let start_length_pair = ((start_value.ilog10() + 2) / 2)*2;  // round up to next pair
-    let end_length_pair = ((end_value.ilog10() + 1) / 2) * 2;  // round down to next pair
-    for sequence_length in start_length_pair/2..end_length_pair/2+1 {
+    let start_length = start_value.ilog10() + 1;
+    let end_length = end_value.ilog10() + 1;
+    let mut counted = HashSet::new();
+    for sequence_length in 1..end_length/2+1 {
         for sequence in 10_u64.pow(sequence_length-1)..10_u64.pow(sequence_length) {
-            let invalid_value = sequence*10_u64.pow(sequence_length) + sequence;
-            if invalid_value < start_value {
-                continue;
+            for repetitions in start_length / sequence_length..end_length/sequence_length+1 {
+                
+                if repetitions == 1 && sequence_length == 1 {
+                    continue;  // Do not count single digits as repetitions
+                }
+                
+                let mut invalid_value = 0;
+                for rep in 0..repetitions {
+                    invalid_value += sequence * 10_u64.pow(rep*sequence_length);
+                }
+
+                if invalid_value < start_value {
+                    continue;
+                }
+                if invalid_value > end_value {
+                    break;
+                }
+                if !counted.contains(&invalid_value) {
+                    println!(" {} is invalid", invalid_value);
+                    sum += invalid_value;
+                    counted.insert(invalid_value);
+                }
             }
-            if invalid_value > end_value {
-                break;  // no need to create more values
-            }
-            sum += invalid_value;
         }
     }
     sum
