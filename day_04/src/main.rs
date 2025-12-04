@@ -10,11 +10,12 @@ fn print_map(map: &Array2<bool>) {
     }
 }
 
-fn accessible_rolls(map: &Array2<bool>) -> u32{
+fn remove_rolls(map: &Array2<bool>) -> (Array2<bool>, u32){
     let x_neighbours = [-1, -1, -1, 0, 0, 1, 1, 1];
     let y_neighbours = [-1, 0, 1, -1, 1, -1, 0, 1];
     let map_shape = map.shape();
     let mut count = 0;
+    let mut new_map = map.clone();
     for index in 0..map_shape[0]*map_shape[1] {
         let row = index / map_shape[1];
         let col = index % map_shape[1];
@@ -31,9 +32,10 @@ fn accessible_rolls(map: &Array2<bool>) -> u32{
         }
         if neighbours < 4 {
             count += 1;
+            new_map[[row, col]] = false;
         }
     }
-    count
+    (new_map, count)
 }
 
 fn main() {
@@ -55,7 +57,19 @@ fn main() {
         flat_map.iter().map(|c| *c == '@').collect::<Vec<_>>(),
     )
     .unwrap();
-    // print_map(&map);
-    let count = accessible_rolls(&map);
-    println!("Number of accessible rolls: {}", count);
+    print_map(&map);
+    let mut total = 0;
+    let mut new_map = map;
+    let mut removed = 0;
+    loop {
+        (new_map, removed) = remove_rolls(&new_map);
+        println!("After removing {}", removed);
+        print_map(&new_map);
+        total += removed;
+        if removed == 0 {
+            println!("Nothing to remove anymore");
+            break;
+        }
+    }
+    println!("Removed {} rolls in total", total);
 }
