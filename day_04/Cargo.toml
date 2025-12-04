@@ -1,0 +1,9 @@
+[package]
+name = "day_04"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+convolve2d = "0.2.0"
+itertools = "0.14.0"
+ndarray = "0.17.1"
