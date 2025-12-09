@@ -35,8 +35,12 @@ fn main() {
     let mut groups = HashMap::<usize, usize>::new();
     let mut all_groups = Vec::<HashSet<usize>>::new();
     const CONNECTIONS: usize = 1000;
-    while n_connections < CONNECTIONS {
+    while n_connections < vertices.len() {
         n_connections += 1;
+         if n_connections == CONNECTIONS {
+            let group_sizes: Vec<_> = sorted(all_groups.iter().map(|s| s.len())).rev().collect();
+            println!("Multiplied three biggest groups after {} connections: {}", n_connections, group_sizes[0] * group_sizes[1] * group_sizes[2]);
+        }
         // println!("After {} connections", n_connections);
         // println!("{:?}", all_groups);
         let vertex = connections.next().unwrap();
@@ -74,9 +78,17 @@ fn main() {
             all_groups[src_idx].extend(to_insert);
             all_groups[tgt_idx].clear();
         }
+        let source_group = groups.get(&source).unwrap();
+        if all_groups[*source_group].len() == n_boxes { // all elements are in the group
+            println!("After {} connections, all are in one group", n_connections);
+            println!("Last vertices that were connected: {} and {}", vertex.source, vertex.target);
+            let x1 = matrix[[vertex.source, 0]];
+            let x2 = matrix[[vertex.target, 0]];
+            println!("x coordinates: {} x {} = {}", x1, x2, x1*x2)
+        }
     }
     // println!("{:?}", all_groups);
-    let group_sizes: Vec<_> = sorted(all_groups.iter().map(|s| s.len())).rev().collect();
+    
     // println!("{:?}", group_sizes);
-    println!("Multiplied: {}", group_sizes[0] * group_sizes[1] * group_sizes[2]);
+    
 }
